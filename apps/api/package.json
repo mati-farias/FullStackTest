@@ -1,0 +1,27 @@
+{
+  "name": "@test/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/jwt": "^8.0",
+    "@fastify/swagger": "^8.0",
+    "@fastify/swagger-ui": "^4.0",
+    "@test/shared": "*",
+    "bcryptjs": "^2.4",
+    "fastify": "^4.28",
+    "postgres": "^3.4",
+    "zod": "^3.23"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4",
+    "@types/node": "^20",
+    "tsx": "^4.0",
+    "typescript": "^5.5"
+  }
+}

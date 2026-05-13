@@ -1,0 +1,11 @@
+export const DomainErrorCode = {
+  NOT_FOUND: 'NOT_FOUND',
+  FORBIDDEN: 'FORBIDDEN',
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  INVALID_TRANSITION: 'INVALID_TRANSITION',
+  INVALID_REVIEWER: 'INVALID_REVIEWER',
+  DOCUMENT_NOT_EDITABLE: 'DOCUMENT_NOT_EDITABLE',
+} as const
+
+export type DomainErrorCode = (typeof DomainErrorCode)[keyof typeof DomainErrorCode]
