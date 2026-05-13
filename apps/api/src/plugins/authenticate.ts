@@ -2,12 +2,10 @@ import type { FastifyRequest, FastifyReply } from 'fastify'
 import type { UserRole } from '@test/shared'
 import { UnauthorizedError } from '../shared/errors'
 
-declare module 'fastify' {
-  interface FastifyRequest {
-    user: {
-      id: string
-      role: UserRole
-    }
+declare module '@fastify/jwt' {
+  interface FastifyJWT {
+    payload: { sub: string; role: UserRole }
+    user: { id: string; role: UserRole }
   }
 }
 

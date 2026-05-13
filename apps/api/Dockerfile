@@ -14,4 +14,4 @@ RUN npm run build -w packages/shared
 
 WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["npx", "tsx", "watch", "src/server.ts"]
+CMD ["npm", "run", "dev"]

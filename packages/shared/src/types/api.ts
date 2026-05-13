@@ -1,6 +1,8 @@
+import type { DomainErrorCode } from '../errors/domain-errors'
+
 export interface ApiError {
   message: string
-  code: string
+  code: DomainErrorCode | 'INTERNAL_ERROR'
   statusCode: number
 }
 

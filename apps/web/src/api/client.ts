@@ -1,21 +1,19 @@
 import type { ApiError } from '@test/shared'
+import { useAuthStore } from '../store/auth.store'
 
 const API_BASE =
   (import.meta.env['VITE_API_URL'] as string | undefined) ?? 'http://localhost:3000'
 
-function getToken(): string | null {
+function clearAuth(): void {
   try {
-    const stored = localStorage.getItem('auth-store')
-    if (!stored) return null
-    const parsed = JSON.parse(stored) as { state?: { token?: string | null } }
-    return parsed.state?.token ?? null
+    localStorage.removeItem('auth-store')
   } catch {
-    return null
+    // storage may be unavailable; silent fail is acceptable here
   }
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getToken()
+  const token = useAuthStore.getState().token
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -30,7 +28,22 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    const error = (await response.json()) as ApiError
+    if (response.status === 401) {
+      clearAuth()
+      window.location.replace('/login')
+      throw { message: 'Session expired', code: 'UNAUTHORIZED', statusCode: 401 } as ApiError
+    }
+
+    let error: ApiError
+    try {
+      error = (await response.json()) as ApiError
+    } catch {
+      error = {
+        message: `Request failed with status ${response.status}`,
+        code: 'INTERNAL_ERROR',
+        statusCode: response.status,
+      }
+    }
     throw error
   }
 

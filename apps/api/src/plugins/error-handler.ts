@@ -2,6 +2,7 @@ import type { FastifyError, FastifyRequest, FastifyReply } from 'fastify'
 import { ZodError } from 'zod'
 import { AppError } from '../shared/errors'
 import type { ApiError } from '@test/shared'
+import { DomainErrorCode } from '@test/shared'
 
 export function errorHandler(
   error: FastifyError | Error,
@@ -23,7 +24,7 @@ export function errorHandler(
       message: error.errors
         .map((e) => `${e.path.join('.')}: ${e.message}`)
         .join('; '),
-      code: 'VALIDATION_ERROR',
+      code: DomainErrorCode.VALIDATION_ERROR,
       statusCode: 422,
     }
     void reply.code(422).send(body)

@@ -44,3 +44,15 @@ export class InvalidTransitionError extends AppError {
     )
   }
 }
+
+export class InvalidReviewerError extends AppError {
+  constructor(message = 'Reviewer not found or not eligible') {
+    super(message, DomainErrorCode.INVALID_REVIEWER, 422)
+  }
+}
+
+export class DocumentNotEditableError extends AppError {
+  constructor(message = 'Document cannot be edited in its current status') {
+    super(message, DomainErrorCode.DOCUMENT_NOT_EDITABLE, 409)
+  }
+}

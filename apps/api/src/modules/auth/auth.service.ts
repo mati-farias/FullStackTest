@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs'
-import type { AuthPayload, User } from '@test/shared'
+import type { AuthPayload, User, UserRole } from '@test/shared'
 import type { RegisterDTO, LoginDTO } from './auth.schemas'
 import type { AuthRepository, UserRow } from './auth.repository'
 import { UnauthorizedError, NotFoundError, ValidationError } from '../../shared/errors'
@@ -7,7 +7,7 @@ import { UnauthorizedError, NotFoundError, ValidationError } from '../../shared/
 export class AuthService {
   constructor(
     private readonly repo: AuthRepository,
-    private readonly jwtSign: (payload: object) => string,
+    private readonly jwtSign: (payload: { sub: string; role: UserRole }) => string,
   ) {}
 
   async register(dto: RegisterDTO): Promise<AuthPayload> {
