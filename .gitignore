@@ -30,8 +30,8 @@ Thumbs.db
 *.swp
 *.swo
 
-# Markdown files (internal docs)
-*.md
+# Internal evaluation rubric — must not reach candidates
+EVALUATION.md
 
 # Claude Code
 .claude/

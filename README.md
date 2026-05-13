@@ -78,9 +78,11 @@ You can use these as-is and as reference for what you need to build:
 - **Error class hierarchy** (`apps/api/src/shared/errors.ts`) — `NotFoundError`, `ForbiddenError`, etc.
 - **Error handler plugin** — maps `AppError` subclasses to structured HTTP responses
 - **Authenticate plugin** — JWT `preHandler`; attaches `request.user` to every protected route
-- **API client** (`apps/web/src/api/client.ts`) — typed fetch wrapper with auth headers
+- **API client** (`apps/web/src/api/client.ts`) — typed fetch wrapper with auth headers and 401 auto-logout
 - **Auth store** (`apps/web/src/store/auth.store.ts`) — Zustand store with token persistence
-- **Login page** — fully implemented
+- **AppShell** (`apps/web/src/components/AppShell.tsx`) — layout with header, user badge, and sign-out
+- **ErrorBoundary** (`apps/web/src/components/ErrorBoundary.tsx`) — catches stub pages and real errors separately
+- **Login / Register pages** — fully implemented
 - **Docker Compose + migrations** — runs on first `docker compose up`
 
 ---
@@ -137,13 +139,24 @@ or does the server crash?
 
 ## Environment Variables
 
+Copy `.env.example` to `.env` — the defaults work out of the box with Docker Compose.
+
 ```bash
-DATABASE_URL=postgresql://postgres:postgres@postgres:5432/test_db
-JWT_SECRET=change_me_to_a_random_32_character_string
-JWT_EXPIRES_IN=8h
+# Database
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/document_workflow
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=document_workflow
+
+# JWT — change before deploying
+JWT_SECRET=change-me-in-production-must-be-at-least-32-characters-long
+
+# API server
 PORT=3000
 NODE_ENV=development
-CORS_ORIGIN=http://localhost:5173
+
+# Web (Vite)
+VITE_API_URL=http://localhost:3000
 ```
 
 ---
