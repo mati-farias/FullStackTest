@@ -4,13 +4,13 @@ import type {
   UserRole,
   CreateDocumentDTO,
   UpdateDocumentDTO,
-} from '@test/shared'
-import type { DocumentRepository } from './document.repository'
+} from "@test/shared";
+import type { DocumentRepository } from "./document.repository";
 import {
   NotFoundError,
   ForbiddenError,
   DocumentNotEditableError,
-} from '../../shared/errors'
+} from "../../shared/errors";
 
 export class DocumentService {
   constructor(private readonly repo: DocumentRepository) {}
@@ -20,32 +20,32 @@ export class DocumentService {
     requesterRole: UserRole,
     documentId: string,
   ): Promise<Document> {
-    const document = await this.repo.findById(documentId)
+    const document = await this.repo.findById(documentId);
     if (!document) {
-      throw new NotFoundError('Document not found')
+      throw new NotFoundError("Document not found");
     }
 
-    if (requesterRole === 'ADMIN') {
-      return document
+    if (requesterRole === "ADMIN") {
+      return document;
     }
 
-    if (requesterRole === 'AUTHOR') {
+    if (requesterRole === "AUTHOR") {
       if (document.authorId !== requesterId) {
-        throw new ForbiddenError('Access denied')
+        throw new ForbiddenError("Access denied");
       }
-      return document
+      return document;
     }
 
-    if (requesterRole === 'REVIEWER') {
-      const isAssignedReviewer = document.reviewerId === requesterId
-      const isSubmitted = document.status === 'SUBMITTED'
+    if (requesterRole === "REVIEWER") {
+      const isAssignedReviewer = document.reviewerId === requesterId;
+      const isSubmitted = document.status === "SUBMITTED";
       if (!isAssignedReviewer && !isSubmitted) {
-        throw new ForbiddenError('Access denied')
+        throw new ForbiddenError("Access denied");
       }
-      return document
+      return document;
     }
 
-    throw new ForbiddenError('Access denied')
+    throw new ForbiddenError("Access denied");
   }
 
   async listDocuments(
@@ -53,7 +53,7 @@ export class DocumentService {
     requesterRole: UserRole,
     filters?: DocumentFilters,
   ): Promise<Document[]> {
-    return this.repo.findAllForUser(requesterId, requesterRole, filters)
+    return this.repo.findAllForUser(requesterId, requesterRole, filters);
   }
 
   async createDocument(
@@ -61,11 +61,11 @@ export class DocumentService {
     role: UserRole,
     dto: CreateDocumentDTO,
   ): Promise<Document> {
-    if (role === 'REVIEWER') {
-      throw new ForbiddenError('Reviewers may not create documents')
+    if (role === "REVIEWER") {
+      throw new ForbiddenError("Reviewers may not create documents");
     }
 
-    return this.repo.create(authorId, dto)
+    return this.repo.create(authorId, dto);
   }
 
   async editDocument(
@@ -74,19 +74,21 @@ export class DocumentService {
     documentId: string,
     dto: UpdateDocumentDTO,
   ): Promise<Document> {
-    const document = await this.repo.findById(documentId)
+    const document = await this.repo.findById(documentId);
     if (!document) {
-      throw new NotFoundError('Document not found')
+      throw new NotFoundError("Document not found");
     }
 
-    if (role !== 'ADMIN' && document.authorId !== requesterId) {
-      throw new ForbiddenError('Only the document author or admin may edit this document')
+    if (role !== "ADMIN" && document.authorId !== requesterId) {
+      throw new ForbiddenError(
+        "Only the document author or admin may edit this document",
+      );
     }
 
-    if (document.status !== 'DRAFT') {
-      throw new DocumentNotEditableError()
+    if (document.status !== "DRAFT") {
+      throw new DocumentNotEditableError();
     }
 
-    return this.repo.update(documentId, dto)
+    return this.repo.update(documentId, dto);
   }
 }
