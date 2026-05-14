@@ -36,14 +36,22 @@ export function LoginPage(): JSX.Element {
 
   return (
     <div className="auth-page">
+      <div className="auth-header">
+        <span className="auth-icon" aria-hidden="true" />
+        <h1 className="auth-title">Sign in to your workspace</h1>
+        <p className="auth-subtitle">
+          Manage documents through their approval lifecycle.
+        </p>
+      </div>
+
       <div className="card auth-card">
-        <h1>Sign in</h1>
         <form onSubmit={(e) => void handleSubmit(e)}>
           <div className="form-row">
             <label htmlFor="email">Email</label>
             <input
               id="email"
               type="email"
+              placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -54,13 +62,14 @@ export function LoginPage(): JSX.Element {
             <input
               id="password"
               type="password"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
           {error !== null && (
-            <p style={{ color: "#dc2626", marginBottom: 12 }}>{error}</p>
+            <p className="error-text">{error}</p>
           )}
           <button
             className="btn"
@@ -72,8 +81,15 @@ export function LoginPage(): JSX.Element {
           </button>
         </form>
         <p className="auth-footer">
-          No account? <Link to="/register">Register</Link>
+          Don&apos;t have an account? <Link to="/register">Create one</Link>
         </p>
+      </div>
+
+      <div className="demo-note">
+        <strong>Demo accounts</strong>
+        author@demo.io &middot; reviewer@demo.io &middot; admin@demo.io
+        <br />
+        Password for all: demo1234
       </div>
     </div>
   );

@@ -10,6 +10,13 @@ export function AppShell({ children }: AppShellProps): JSX.Element {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
+  const initials =
+    user?.name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toLowerCase() ?? "";
 
   function handleLogout(): void {
     logout();
@@ -20,6 +27,7 @@ export function AppShell({ children }: AppShellProps): JSX.Element {
     <div className="app-shell">
       <header className="app-shell__header">
         <Link to="/documents" className="app-shell__brand">
+          <span className="brand-icon" aria-hidden="true" />
           Document Approval
         </Link>
 
@@ -27,6 +35,7 @@ export function AppShell({ children }: AppShellProps): JSX.Element {
           <div className="app-shell__user">
             <span
               className="app-shell__user-name"
+              data-initials={initials}
               aria-label={`Signed in as ${user.name} (${user.role})`}
             >
               {user.name}

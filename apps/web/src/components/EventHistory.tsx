@@ -14,10 +14,12 @@ export function EventHistory({ events }: EventHistoryProps): JSX.Element {
       {events.map((event) => (
         <div key={event.id} className="event-history__item">
           <strong>
-            {event.fromStatus} → {event.toStatus}
+            {event.fromStatus.replace("_", " ")} -&gt;{" "}
+            {event.toStatus.replace("_", " ")}
           </strong>
           <p>
-            By {event.actorId} · {new Date(event.createdAt).toLocaleString()}
+            By {event.actorId} &middot;{" "}
+            {new Date(event.createdAt).toLocaleString()}
           </p>
           {event.comment ? <p>{event.comment}</p> : null}
         </div>

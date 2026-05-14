@@ -7,7 +7,6 @@ import { useDocument } from "../hooks/useDocuments";
 import { DocumentForm } from "../components/DocumentForm";
 import { TransitionButton } from "../components/TransitionButton";
 import { EventHistory } from "../components/EventHistory";
-import { statusColors } from "../utils/document-status";
 
 export function DocumentDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>();
@@ -39,9 +38,9 @@ export function DocumentDetailPage(): JSX.Element {
   }, [fetchHistory]);
 
   if (!id) return <p>Missing document id.</p>;
-  if (!user) return <p>Loading user…</p>;
-  if (loading && !document) return <p>Loading document…</p>;
-  if (error) return <p style={{ color: "#dc2626" }}>{error}</p>;
+  if (!user) return <p>Loading user...</p>;
+  if (loading && !document) return <p>Loading document...</p>;
+  if (error) return <p className="error-text">{error}</p>;
   if (!document) return <p>Document not found.</p>;
 
   const canEditDraft =
@@ -50,9 +49,9 @@ export function DocumentDetailPage(): JSX.Element {
 
   return (
     <div>
-      <p style={{ marginBottom: 24 }}>
-        <Link to="/documents">← Back to documents</Link>
-      </p>
+      <Link className="back-link" to="/documents">
+        Back to documents
+      </Link>
 
       <section className="page-panel" style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -63,10 +62,7 @@ export function DocumentDetailPage(): JSX.Element {
           </div>
 
           <div className="document-meta">
-            <span
-              className={`status-chip status-chip--${document.status}`}
-              style={{ backgroundColor: statusColors[document.status] }}
-            >
+            <span className={`status-chip status-chip--${document.status}`}>
               {document.status.replace("_", " ")}
             </span>
             <span>Author: {document.authorId}</span>
@@ -74,22 +70,12 @@ export function DocumentDetailPage(): JSX.Element {
           </div>
 
           {document.reviewComment ? (
-            <p style={{ color: "#475569" }}>
+            <p style={{ color: "#4b5563" }}>
               <strong>Review comment:</strong> {document.reviewComment}
             </p>
           ) : null}
 
-          <div
-            style={{
-              whiteSpace: "pre-wrap",
-              border: "1px solid #e2e8f0",
-              borderRadius: 18,
-              padding: 20,
-              marginTop: 12,
-              background: "#f8fafc",
-              color: "#334155",
-            }}
-          >
+          <div className="detail-content">
             {document.content.trim() || "No content yet."}
           </div>
         </div>
@@ -120,9 +106,7 @@ export function DocumentDetailPage(): JSX.Element {
 
       <section className="page-panel">
         <h2 className="section-title">History</h2>
-        {historyError ? (
-          <p style={{ color: "#dc2626", marginBottom: 12 }}>{historyError}</p>
-        ) : null}
+        {historyError ? <p className="error-text">{historyError}</p> : null}
         <EventHistory events={events} />
       </section>
     </div>

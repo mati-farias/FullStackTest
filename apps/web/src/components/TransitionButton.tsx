@@ -68,7 +68,7 @@ export function TransitionButton({
   }
 
   return (
-    <div className="card">
+    <div className="card transition-card">
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         {availableTargets.map((target) => {
           const rule = findTransitionRule(document.status, target);
@@ -90,7 +90,7 @@ export function TransitionButton({
                 }
               }}
             >
-              Move to {target}
+              Move to {target.replace("_", " ")}
             </button>
           );
         })}
@@ -99,7 +99,9 @@ export function TransitionButton({
       {activeTarget ? (
         <div style={{ marginTop: 16 }}>
           <div className="form-row">
-            <label style={{ marginBottom: 0 }}>Move to {activeTarget}</label>
+            <label style={{ marginBottom: 0 }}>
+              Move to {activeTarget.replace("_", " ")}
+            </label>
           </div>
           {findTransitionRule(document.status, activeTarget)
             ?.requiresReviewerId && currentUser.role !== "REVIEWER" ? (
@@ -146,7 +148,9 @@ export function TransitionButton({
       ) : null}
 
       {error ? (
-        <p style={{ color: "#dc2626", marginTop: 12 }}>{error}</p>
+        <p className="error-text" style={{ marginTop: 12 }}>
+          {error}
+        </p>
       ) : null}
     </div>
   );

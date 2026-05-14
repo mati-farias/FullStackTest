@@ -43,15 +43,22 @@ export function RegisterPage(): JSX.Element {
 
   return (
     <div className="auth-page">
-      <div className="card auth-card">
-        <h1>Create account</h1>
+      <div className="auth-header">
+        <span className="auth-icon" aria-hidden="true" />
+        <h1 className="auth-title">Create your account</h1>
+        <p className="auth-subtitle">
+          Join your team&apos;s document approval workflow.
+        </p>
+      </div>
 
+      <div className="card auth-card">
         <form onSubmit={(e) => void handleSubmit(e)}>
           <div className="form-row">
-            <label htmlFor="name">Name</label>
+            <label htmlFor="name">Full name</label>
             <input
               id="name"
               type="text"
+              placeholder="Jamie Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -63,6 +70,7 @@ export function RegisterPage(): JSX.Element {
             <input
               id="email"
               type="email"
+              placeholder="you@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -74,6 +82,7 @@ export function RegisterPage(): JSX.Element {
             <input
               id="password"
               type="password"
+              placeholder="********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -81,20 +90,25 @@ export function RegisterPage(): JSX.Element {
           </div>
 
           <div className="form-row">
-            <label htmlFor="role">Role</label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as UserRole)}
-            >
-              <option value="AUTHOR">Author</option>
-              <option value="REVIEWER">Reviewer</option>
-              <option value="ADMIN">Admin</option>
-            </select>
+            <label>Role</label>
+            <div className="role-options" role="group" aria-label="Role">
+              {(["AUTHOR", "REVIEWER", "ADMIN"] as UserRole[]).map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={`role-option${
+                    role === item ? " role-option--active" : ""
+                  }`}
+                  onClick={() => setRole(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
           </div>
 
           {error !== null && (
-            <p style={{ color: "#dc2626", marginBottom: 12 }}>{error}</p>
+            <p className="error-text">{error}</p>
           )}
 
           <button

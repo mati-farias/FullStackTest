@@ -67,7 +67,7 @@ export function DocumentForm({
       </div>
 
       {error !== null && (
-        <p style={{ color: "#dc2626", marginBottom: 12 }}>{error}</p>
+        <p className="error-text">{error}</p>
       )}
 
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
