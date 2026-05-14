@@ -4,6 +4,7 @@ import { DocumentRepository } from "../documents/document.repository";
 import { TransitionRepository } from "./transition.repository";
 import { TransitionService } from "./transition.service";
 import { AuthRepository } from "../auth/auth.repository";
+import { transitionRequestSchema } from "./transition.schemas";
 
 export const transitionRoutes: FastifyPluginAsync = async (fastify) => {
   const documentRepo = new DocumentRepository();
@@ -13,16 +14,31 @@ export const transitionRoutes: FastifyPluginAsync = async (fastify) => {
 
   fastify.addHook("preHandler", authenticate);
 
-  // POST /api/documents/:id/transitions
-  // Body: TransitionRequest (targetStatus, comment?, reviewerId?)
-  // TODO: parse and validate body, call TransitionService.execute, return 200 { data: { document, event } }
-  fastify.post("/:id/transitions", async (_request, _reply) => {
-    throw new Error("Not implemented");
+  fastify.post("/:id/transitions", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const body = transitionRequestSchema.parse(request.body);
+
+    const result = await service.execute({
+      documentId: id,
+      targetStatus: body.targetStatus,
+      actorId: request.user.id,
+      actorRole: request.user.role,
+      comment: body.comment,
+      reviewerId: body.reviewerId,
+    });
+
+    void reply.send({ data: result });
   });
 
-  // GET /api/documents/:id/history
-  // TODO: call TransitionService.getHistory, return 200 { data: events }
-  fastify.get("/:id/history", async (_request, _reply) => {
-    throw new Error("Not implemented");
+  fastify.get("/:id/history", async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    const events = await service.getHistory(
+      id,
+      request.user.id,
+      request.user.role,
+    );
+
+    void reply.send({ data: events });
   });
 };
