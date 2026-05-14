@@ -6,29 +6,31 @@ import {
   type UserRole,
   findTransitionRule,
   canTransition,
-} from '@test/shared'
-import type { DocumentRepository } from '../documents/document.repository'
-import type { TransitionRepository } from './transition.repository'
+} from "@test/shared";
+import type { DocumentRepository } from "../documents/document.repository";
+import type { TransitionRepository } from "./transition.repository";
+import { AuthRepository } from "../auth/auth.repository";
 import {
   NotFoundError,
   ForbiddenError,
   ValidationError,
   InvalidTransitionError,
-} from '../../shared/errors'
+} from "../../shared/errors";
 
 export interface ExecuteTransitionInput {
-  documentId: string
-  targetStatus: DocumentStatus
-  actorId: string
-  actorRole: UserRole
-  comment?: string
-  reviewerId?: string
+  documentId: string;
+  targetStatus: DocumentStatus;
+  actorId: string;
+  actorRole: UserRole;
+  comment?: string;
+  reviewerId?: string;
 }
 
 export class TransitionService {
   constructor(
     private readonly documentRepo: DocumentRepository,
     private readonly transitionRepo: TransitionRepository,
+    private readonly authRepo: AuthRepository,
   ) {}
 
   /**
@@ -64,8 +66,96 @@ export class TransitionService {
    *   → DRAFT (from REJECTED) : clear reviewerId and reviewComment (set to null)
    *   all transitions : set status = targetStatus
    */
-  async execute(_input: ExecuteTransitionInput): Promise<TransitionResult> {
-    throw new Error('Not implemented')
+  async execute(input: ExecuteTransitionInput): Promise<TransitionResult> {
+    const document = await this.documentRepo.findById(input.documentId);
+    if (!document) {
+      throw new NotFoundError("Document not found");
+    }
+
+    const rule = findTransitionRule(document.status, input.targetStatus);
+    if (!rule) {
+      throw new InvalidTransitionError(document.status, input.targetStatus);
+    }
+
+    const isOwner =
+      input.actorRole === "ADMIN" || document.authorId === input.actorId;
+    const isAssignedReviewer =
+      input.actorRole === "ADMIN" || document.reviewerId === input.actorId;
+
+    if (
+      !canTransition(
+        document.status,
+        input.targetStatus,
+        input.actorRole,
+        isOwner,
+        isAssignedReviewer,
+      )
+    ) {
+      throw new ForbiddenError("Transition not permitted");
+    }
+
+    if (rule.requiresComment && !input.comment?.trim()) {
+      throw new ValidationError("Comment is required for this transition");
+    }
+
+    let reviewerId: string | undefined;
+    if (rule.requiresReviewerId) {
+      if (!input.reviewerId?.trim()) {
+        throw new ValidationError("ReviewerId is required for this transition");
+      }
+
+      const reviewer = await this.authRepo.findById(input.reviewerId);
+      if (!reviewer) {
+        throw new NotFoundError("Reviewer not found");
+      }
+      if (reviewer.role !== "REVIEWER") {
+        throw new ForbiddenError("Reviewer must have REVIEWER role");
+      }
+
+      reviewerId = reviewer.id;
+    }
+
+    if (
+      document.status === "DRAFT" &&
+      input.targetStatus === "SUBMITTED" &&
+      (!document.title.trim() || !document.content.trim())
+    ) {
+      throw new ValidationError(
+        "Document title and content are required before submission",
+      );
+    }
+
+    const patch: Partial<
+      Pick<Document, "status" | "reviewerId" | "reviewComment">
+    > = {
+      status: input.targetStatus,
+    };
+
+    if (input.targetStatus === "UNDER_REVIEW") {
+      patch.reviewerId = reviewerId;
+    }
+
+    if (
+      input.targetStatus === "APPROVED" ||
+      input.targetStatus === "REJECTED"
+    ) {
+      patch.reviewComment = input.comment ?? null;
+    }
+
+    if (document.status === "REJECTED" && input.targetStatus === "DRAFT") {
+      patch.reviewerId = null;
+      patch.reviewComment = null;
+    }
+
+    const event: Omit<DocumentEvent, "id" | "createdAt"> = {
+      documentId: input.documentId,
+      actorId: input.actorId,
+      fromStatus: document.status,
+      toStatus: input.targetStatus,
+      comment: input.comment ?? null,
+    };
+
+    return this.transitionRepo.recordTransition(input.documentId, patch, event);
   }
 
   /**
@@ -74,10 +164,35 @@ export class TransitionService {
    *       Reuse document visibility rules (same as DocumentService.getDocument).
    */
   async getHistory(
-    _documentId: string,
-    _requesterId: string,
-    _requesterRole: UserRole,
+    documentId: string,
+    requesterId: string,
+    requesterRole: UserRole,
   ): Promise<DocumentEvent[]> {
-    throw new Error('Not implemented')
+    const document = await this.documentRepo.findById(documentId);
+    if (!document) {
+      throw new NotFoundError("Document not found");
+    }
+
+    if (requesterRole === "ADMIN") {
+      return this.transitionRepo.getHistory(documentId);
+    }
+
+    if (requesterRole === "AUTHOR") {
+      if (document.authorId !== requesterId) {
+        throw new ForbiddenError("Access denied");
+      }
+      return this.transitionRepo.getHistory(documentId);
+    }
+
+    if (requesterRole === "REVIEWER") {
+      const isAssignedReviewer = document.reviewerId === requesterId;
+      const isSubmitted = document.status === "SUBMITTED";
+      if (!isAssignedReviewer && !isSubmitted) {
+        throw new ForbiddenError("Access denied");
+      }
+      return this.transitionRepo.getHistory(documentId);
+    }
+
+    throw new ForbiddenError("Access denied");
   }
 }
