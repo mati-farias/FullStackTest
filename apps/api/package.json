@@ -9,6 +9,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@fastify/cors": "^8.5.0",
     "@fastify/jwt": "^8.0",
     "@fastify/swagger": "^8.0",
     "@fastify/swagger-ui": "^4.0",

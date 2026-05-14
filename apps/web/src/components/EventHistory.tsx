@@ -1,14 +1,34 @@
-import type { DocumentEvent } from '@test/shared'
+import type { DocumentEvent } from "@test/shared";
 
 interface EventHistoryProps {
-  events: DocumentEvent[]
+  events: DocumentEvent[];
 }
 
 export function EventHistory({ events }: EventHistoryProps): JSX.Element {
-  // TODO: Render a chronological timeline of DocumentEvent[].
-  //       For each event show: fromStatus → toStatus, actorId, createdAt date,
-  //       and comment if present.
-  //       Display oldest events first (events arrive ordered ASC from the API).
-  void events
-  throw new Error('Not implemented')
+  if (events.length === 0) {
+    return <p>No history yet.</p>;
+  }
+
+  return (
+    <div>
+      {events.map((event) => (
+        <div
+          key={event.id}
+          style={{
+            borderLeft: "3px solid #ccc",
+            paddingLeft: 12,
+            marginBottom: 12,
+          }}
+        >
+          <strong>
+            {event.fromStatus} → {event.toStatus}
+          </strong>
+          <p style={{ margin: "4px 0", color: "#666" }}>
+            By {event.actorId} · {new Date(event.createdAt).toLocaleString()}
+          </p>
+          {event.comment ? <p style={{ margin: 0 }}>{event.comment}</p> : null}
+        </div>
+      ))}
+    </div>
+  );
 }
