@@ -42,91 +42,75 @@ export function RegisterPage(): JSX.Element {
   }
 
   return (
-    <div style={{ maxWidth: 400, margin: "100px auto", padding: 24 }}>
-      <h1>Create account</h1>
+    <div className="auth-page">
+      <div className="card auth-card">
+        <h1>Create account</h1>
 
-      <form onSubmit={(e) => void handleSubmit(e)}>
-        <div style={{ marginBottom: 12 }}>
-          <label htmlFor="name" style={{ display: "block", marginBottom: 4 }}>
-            Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
-          />
-        </div>
+        <form onSubmit={(e) => void handleSubmit(e)}>
+          <div className="form-row">
+            <label htmlFor="name">Name</label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <label htmlFor="email" style={{ display: "block", marginBottom: 4 }}>
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
-          />
-        </div>
+          <div className="form-row">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <label
-            htmlFor="password"
-            style={{ display: "block", marginBottom: 4 }}
+          <div className="form-row">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-row">
+            <label htmlFor="role">Role</label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value as UserRole)}
+            >
+              <option value="AUTHOR">Author</option>
+              <option value="REVIEWER">Reviewer</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
+
+          {error !== null && (
+            <p style={{ color: "#dc2626", marginBottom: 12 }}>{error}</p>
+          )}
+
+          <button
+            className="btn"
+            type="submit"
+            disabled={loading}
+            style={{ width: "100%" }}
           >
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
-          />
-        </div>
+            {loading ? "Creating account…" : "Create account"}
+          </button>
+        </form>
 
-        <div style={{ marginBottom: 12 }}>
-          <label htmlFor="role" style={{ display: "block", marginBottom: 4 }}>
-            Role
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as UserRole)}
-            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
-          >
-            <option value="AUTHOR">Author</option>
-            <option value="REVIEWER">Reviewer</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
-
-        {error !== null && (
-          <p style={{ color: "red", marginBottom: 12 }}>{error}</p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "10px",
-            cursor: loading ? "not-allowed" : "pointer",
-          }}
-        >
-          {loading ? "Creating account…" : "Create account"}
-        </button>
-      </form>
-
-      <p style={{ marginTop: 16, textAlign: "center" }}>
-        Already have an account? <Link to="/login">Sign in</Link>
-      </p>
+        <p className="auth-footer">
+          Already have an account? <Link to="/login">Sign in</Link>
+        </p>
+      </div>
     </div>
   );
 }

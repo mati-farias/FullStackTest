@@ -64,12 +64,12 @@ export function TransitionButton({
   }
 
   if (availableTargets.length === 0) {
-    return <p>No actions available.</p>;
+    return <div className="empty-state">No actions available.</div>;
   }
 
   return (
-    <div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+    <div className="card">
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         {availableTargets.map((target) => {
           const rule = findTransitionRule(document.status, target);
           const needsInput = Boolean(
@@ -80,6 +80,7 @@ export function TransitionButton({
             <button
               key={target}
               type="button"
+              className="btn btn-secondary"
               disabled={loading}
               onClick={() => {
                 if (needsInput) {
@@ -96,61 +97,57 @@ export function TransitionButton({
       </div>
 
       {activeTarget ? (
-        <div style={{ marginTop: 12, padding: 12, border: "1px solid #ddd" }}>
-          <h4 style={{ marginTop: 0 }}>Move to {activeTarget}</h4>
+        <div style={{ marginTop: 16 }}>
+          <div className="form-row">
+            <label style={{ marginBottom: 0 }}>Move to {activeTarget}</label>
+          </div>
           {findTransitionRule(document.status, activeTarget)
             ?.requiresReviewerId && currentUser.role !== "REVIEWER" ? (
-            <div style={{ marginBottom: 8 }}>
-              <label
-                htmlFor="reviewerId"
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Reviewer ID
-              </label>
+            <div className="form-row">
+              <label htmlFor="reviewerId">Reviewer ID</label>
               <input
                 id="reviewerId"
                 value={reviewerId}
                 onChange={(e) => setReviewerId(e.target.value)}
-                style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
               />
             </div>
           ) : null}
           {findTransitionRule(document.status, activeTarget)
             ?.requiresComment ? (
-            <div style={{ marginBottom: 8 }}>
-              <label
-                htmlFor="comment"
-                style={{ display: "block", marginBottom: 4 }}
-              >
-                Comment
-              </label>
+            <div className="form-row">
+              <label htmlFor="comment">Comment</label>
               <textarea
                 id="comment"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={3}
-                style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
               />
             </div>
           ) : null}
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => void runTransition(activeTarget)}
-          >
-            Confirm
-          </button>{" "}
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => setActiveTarget(null)}
-          >
-            Cancel
-          </button>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn"
+              disabled={loading}
+              onClick={() => void runTransition(activeTarget)}
+            >
+              Confirm
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={loading}
+              onClick={() => setActiveTarget(null)}
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       ) : null}
 
-      {error ? <p style={{ color: "red" }}>{error}</p> : null}
+      {error ? (
+        <p style={{ color: "#dc2626", marginTop: 12 }}>{error}</p>
+      ) : null}
     </div>
   );
 }

@@ -48,63 +48,78 @@ export function DocumentsPage(): JSX.Element {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          gap: 16,
-          alignItems: "center",
-          marginBottom: 24,
-        }}
-      >
-        <div>
-          <h1 style={{ marginBottom: 4 }}>Documents</h1>
-          <p style={{ marginTop: 0, color: "#666" }}>
-            Manage approval workflow documents.
-          </p>
+      <section className="page-panel" style={{ marginBottom: 24 }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <div>
+            <h1 className="page-heading">Documents</h1>
+            <p className="page-subtitle">Manage approval workflow documents.</p>
+          </div>
+
+          {(user.role === "AUTHOR" || user.role === "ADMIN") && (
+            <button
+              className="btn"
+              type="button"
+              onClick={() => setShowForm((value) => !value)}
+            >
+              {showForm ? "Cancel" : "New document"}
+            </button>
+          )}
         </div>
 
-        {(user.role === "AUTHOR" || user.role === "ADMIN") && (
-          <button type="button" onClick={() => setShowForm((value) => !value)}>
-            {showForm ? "Cancel" : "New document"}
-          </button>
-        )}
-      </div>
-
-      <div style={{ marginBottom: 16 }}>
-        <label htmlFor="status-filter" style={{ marginRight: 8 }}>
-          Status
-        </label>
-        <select
-          id="status-filter"
-          value={status}
-          onChange={(e) => setStatus(e.target.value as DocumentStatus | "")}
+        <div
+          style={{
+            marginTop: 24,
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 12,
+            alignItems: "center",
+          }}
         >
-          {statuses.map((item) => (
-            <option key={item || "ALL"} value={item}>
-              {item || "ALL"}
-            </option>
-          ))}
-        </select>
-      </div>
+          <label htmlFor="status-filter" style={{ color: "#475569" }}>
+            Status
+          </label>
+          <select
+            id="status-filter"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as DocumentStatus | "")}
+            style={{ minWidth: 180, borderRadius: 14 }}
+          >
+            {statuses.map((item) => (
+              <option key={item || "ALL"} value={item}>
+                {item || "ALL"}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
 
       {showForm && (
-        <div style={{ marginBottom: 24 }}>
+        <section className="page-panel" style={{ marginBottom: 24 }}>
           <DocumentForm
             onSave={handleCreate}
             loading={createDocument.loading}
           />
           {createDocument.error && (
-            <p style={{ color: "red" }}>{createDocument.error}</p>
+            <p style={{ color: "#dc2626", marginTop: 12 }}>
+              {createDocument.error}
+            </p>
           )}
-        </div>
+        </section>
       )}
 
-      {loading && <p>Loading documents…</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {loading && <div className="empty-state">Loading documents…</div>}
+      {error && <p style={{ color: "#dc2626", marginBottom: 16 }}>{error}</p>}
 
       {!loading && !error && documents.length === 0 && (
-        <p>No documents found.</p>
+        <div className="empty-state">No documents found.</div>
       )}
 
       {!loading &&

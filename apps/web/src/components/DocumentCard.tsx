@@ -1,19 +1,20 @@
 import { Link } from "react-router-dom";
 import type { Document, DocumentStatus, User } from "@test/shared";
+import { statusColors } from "../utils/document-status";
 
 interface DocumentCardProps {
   document: Document;
   currentUser: User;
 }
 
-const statusColors: Record<DocumentStatus, string> = {
-  DRAFT: "#777",
-  SUBMITTED: "#2563eb",
-  UNDER_REVIEW: "#d97706",
-  APPROVED: "#16a34a",
-  REJECTED: "#dc2626",
-  WITHDRAWN: "#777",
-};
+// const statusColors: Record<DocumentStatus, string> = {
+//   DRAFT: "#777",
+//   SUBMITTED: "#2563eb",
+//   UNDER_REVIEW: "#d97706",
+//   APPROVED: "#16a34a",
+//   REJECTED: "#dc2626",
+//   WITHDRAWN: "#777",
+// };
 
 export function DocumentCard({
   document,
@@ -21,52 +22,42 @@ export function DocumentCard({
 }: DocumentCardProps): JSX.Element {
   const canEdit =
     currentUser.role === "ADMIN" || document.authorId === currentUser.id;
+  const summary = document.content.trim()
+    ? `${document.content.slice(0, 140)}${document.content.length > 140 ? "…" : ""}`
+    : "No content yet.";
 
   return (
-    <article
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: 8,
-        padding: 16,
-        marginBottom: 12,
-      }}
-    >
+    <article className="card" style={{ marginBottom: 16 }}>
       <div
-        style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: 16,
+          alignItems: "center",
+          flexWrap: "wrap",
+        }}
       >
-        <h3 style={{ margin: 0 }}>
-          <Link to={`/documents/${document.id}`}>
+        <h3 style={{ margin: 0, fontSize: "1.1rem" }}>
+          <Link to={`/documents/${document.id}`} style={{ color: "#0f172a" }}>
             {document.title.trim() || "Untitled document"}
           </Link>
         </h3>
 
-        <span
-          style={{
-            background: statusColors[document.status],
-            color: "white",
-            borderRadius: 999,
-            padding: "4px 8px",
-            fontSize: 12,
-            height: "fit-content",
-          }}
-        >
+        <span className={`status-chip status-chip--${document.status}`}>
           {document.status}
         </span>
       </div>
 
-      <p style={{ margin: "8px 0", color: "#666" }}>
-        Updated {new Date(document.updatedAt).toLocaleString()}
-      </p>
+      <div className="document-meta">
+        <span>Updated {new Date(document.updatedAt).toLocaleString()}</span>
+        {canEdit && document.status === "DRAFT" ? (
+          <span>Editable draft</span>
+        ) : null}
+      </div>
 
-      <p style={{ margin: 0 }}>
-        {document.content.trim()
-          ? `${document.content.slice(0, 140)}${document.content.length > 140 ? "…" : ""}`
-          : "No content yet."}
+      <p style={{ marginTop: 14, color: "#475569", lineHeight: 1.7 }}>
+        {summary}
       </p>
-
-      {canEdit && document.status === "DRAFT" ? (
-        <p style={{ marginTop: 8, fontSize: 13 }}>Editable draft</p>
-      ) : null}
     </article>
   );
 }

@@ -44,38 +44,35 @@ export function DocumentForm({
   }
 
   return (
-    <div style={{ border: "1px solid #ddd", padding: 16, borderRadius: 8 }}>
-      <div style={{ marginBottom: 12 }}>
-        <label htmlFor="title" style={{ display: "block", marginBottom: 4 }}>
-          Title
-        </label>
+    <div className="card document-form">
+      <div className="form-row">
+        <label htmlFor="title">Title</label>
         <input
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={loading}
-          style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
         />
       </div>
 
-      <div style={{ marginBottom: 12 }}>
-        <label htmlFor="content" style={{ display: "block", marginBottom: 4 }}>
-          Content
-        </label>
+      <div className="form-row">
+        <label htmlFor="content">Content</label>
         <textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           disabled={loading}
           rows={6}
-          style={{ width: "100%", padding: 8, boxSizing: "border-box" }}
         />
       </div>
 
-      {error !== null && <p style={{ color: "red" }}>{error}</p>}
+      {error !== null && (
+        <p style={{ color: "#dc2626", marginBottom: 12 }}>{error}</p>
+      )}
 
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
         <button
+          className="btn btn-secondary"
           type="button"
           onClick={() => void handleSave()}
           disabled={loading}
@@ -85,6 +82,7 @@ export function DocumentForm({
 
         {onSubmit ? (
           <button
+            className="btn"
             type="button"
             onClick={() => void handleSubmit()}
             disabled={loading}
