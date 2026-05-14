@@ -6,57 +6,87 @@ import type {
   UpdateDocumentDTO,
 } from '@test/shared'
 import type { DocumentRepository } from './document.repository'
-import { NotFoundError, ForbiddenError } from '../../shared/errors'
+import {
+  NotFoundError,
+  ForbiddenError,
+  DocumentNotEditableError,
+} from '../../shared/errors'
 
 export class DocumentService {
   constructor(private readonly repo: DocumentRepository) {}
 
   async getDocument(
-    _requesterId: string,
-    _requesterRole: UserRole,
-    _documentId: string,
+    requesterId: string,
+    requesterRole: UserRole,
+    documentId: string,
   ): Promise<Document> {
-    // TODO: Fetch document by id → NotFoundError if missing.
-    //       Check visibility based on role:
-    //         ADMIN    : always allowed
-    //         AUTHOR   : allowed only if doc.authorId === requesterId
-    //         REVIEWER : allowed if doc.reviewerId === requesterId OR doc.status === 'SUBMITTED'
-    //       → ForbiddenError if the requester cannot see this document.
-    throw new Error('Not implemented')
+    const document = await this.repo.findById(documentId)
+    if (!document) {
+      throw new NotFoundError('Document not found')
+    }
+
+    if (requesterRole === 'ADMIN') {
+      return document
+    }
+
+    if (requesterRole === 'AUTHOR') {
+      if (document.authorId !== requesterId) {
+        throw new ForbiddenError('Access denied')
+      }
+      return document
+    }
+
+    if (requesterRole === 'REVIEWER') {
+      const isAssignedReviewer = document.reviewerId === requesterId
+      const isSubmitted = document.status === 'SUBMITTED'
+      if (!isAssignedReviewer && !isSubmitted) {
+        throw new ForbiddenError('Access denied')
+      }
+      return document
+    }
+
+    throw new ForbiddenError('Access denied')
   }
 
   async listDocuments(
-    _requesterId: string,
-    _requesterRole: UserRole,
-    _filters?: DocumentFilters,
+    requesterId: string,
+    requesterRole: UserRole,
+    filters?: DocumentFilters,
   ): Promise<Document[]> {
-    // TODO: Delegate to repo.findAllForUser — it handles role-based filtering.
-    //       Pass through optional filters for status and pagination.
-    throw new Error('Not implemented')
+    return this.repo.findAllForUser(requesterId, requesterRole, filters)
   }
 
   async createDocument(
-    _authorId: string,
-    _role: UserRole,
-    _dto: CreateDocumentDTO,
+    authorId: string,
+    role: UserRole,
+    dto: CreateDocumentDTO,
   ): Promise<Document> {
-    // TODO: Only AUTHOR and ADMIN roles may create documents.
-    //       → ForbiddenError if role is REVIEWER.
-    //       Delegate to repo.create and return the created document.
-    throw new Error('Not implemented')
+    if (role === 'REVIEWER') {
+      throw new ForbiddenError('Reviewers may not create documents')
+    }
+
+    return this.repo.create(authorId, dto)
   }
 
   async editDocument(
-    _requesterId: string,
-    _role: UserRole,
-    _documentId: string,
-    _dto: UpdateDocumentDTO,
+    requesterId: string,
+    role: UserRole,
+    documentId: string,
+    dto: UpdateDocumentDTO,
   ): Promise<Document> {
-    // TODO: Fetch document → NotFoundError if missing.
-    //       Only the document's author (or ADMIN) may edit → ForbiddenError if not.
-    //       Document must be in DRAFT status to be editable.
-    //       → ValidationError with code DOCUMENT_NOT_EDITABLE if status !== 'DRAFT'.
-    //       Delegate to repo.update and return the updated document.
-    throw new Error('Not implemented')
+    const document = await this.repo.findById(documentId)
+    if (!document) {
+      throw new NotFoundError('Document not found')
+    }
+
+    if (role !== 'ADMIN' && document.authorId !== requesterId) {
+      throw new ForbiddenError('Only the document author or admin may edit this document')
+    }
+
+    if (document.status !== 'DRAFT') {
+      throw new DocumentNotEditableError()
+    }
+
+    return this.repo.update(documentId, dto)
   }
 }
