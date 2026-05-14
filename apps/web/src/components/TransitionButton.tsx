@@ -52,7 +52,8 @@ export function TransitionButton({
     }
 
     if (rule?.requiresReviewerId) {
-      req.reviewerId = reviewerId;
+      req.reviewerId =
+        currentUser.role === "REVIEWER" ? currentUser.id : reviewerId;
     }
 
     const result = await transition(req);
@@ -98,7 +99,7 @@ export function TransitionButton({
         <div style={{ marginTop: 12, padding: 12, border: "1px solid #ddd" }}>
           <h4 style={{ marginTop: 0 }}>Move to {activeTarget}</h4>
           {findTransitionRule(document.status, activeTarget)
-            ?.requiresReviewerId ? (
+            ?.requiresReviewerId && currentUser.role !== "REVIEWER" ? (
             <div style={{ marginBottom: 8 }}>
               <label
                 htmlFor="reviewerId"
