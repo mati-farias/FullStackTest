@@ -1,40 +1,61 @@
-import type { FastifyRequest, FastifyReply } from 'fastify'
-import type { DocumentService } from './document.service'
+import type { FastifyRequest, FastifyReply } from "fastify";
+import type { DocumentService } from "./document.service";
 import {
   createDocumentSchema,
   updateDocumentSchema,
   documentFiltersSchema,
-} from './document.schemas'
+} from "./document.schemas";
 
 export class DocumentController {
   constructor(private readonly service: DocumentService) {}
 
-  async list(_request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-    // TODO: Parse query string with documentFiltersSchema.
-    //       Call service.listDocuments(request.user.id, request.user.role, filters).
-    //       Return 200 { data: documents }.
-    throw new Error('Not implemented')
+  async list(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const filters = documentFiltersSchema.parse(request.query);
+
+    const documents = await this.service.listDocuments(
+      request.user.id,
+      request.user.role,
+      filters,
+    );
+
+    void reply.send({ data: documents });
   }
 
-  async create(_request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-    // TODO: Parse request.body with createDocumentSchema.
-    //       Call service.createDocument(request.user.id, request.user.role, dto).
-    //       Return 201 { data: document }.
-    throw new Error('Not implemented')
+  async create(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const dto = createDocumentSchema.parse(request.body);
+
+    const document = await this.service.createDocument(
+      request.user.id,
+      request.user.role,
+      dto,
+    );
+
+    void reply.code(201).send({ data: document });
   }
 
-  async getOne(_request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-    // TODO: Extract id from (request.params as { id: string }).id.
-    //       Call service.getDocument(request.user.id, request.user.role, id).
-    //       Return 200 { data: document }.
-    throw new Error('Not implemented')
+  async getOne(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const { id } = request.params as { id: string };
+
+    const document = await this.service.getDocument(
+      request.user.id,
+      request.user.role,
+      id,
+    );
+
+    void reply.send({ data: document });
   }
 
-  async update(_request: FastifyRequest, _reply: FastifyReply): Promise<void> {
-    // TODO: Extract id from (request.params as { id: string }).id.
-    //       Parse request.body with updateDocumentSchema.
-    //       Call service.editDocument(request.user.id, request.user.role, id, dto).
-    //       Return 200 { data: document }.
-    throw new Error('Not implemented')
+  async update(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+    const { id } = request.params as { id: string };
+    const dto = updateDocumentSchema.parse(request.body);
+
+    const document = await this.service.editDocument(
+      request.user.id,
+      request.user.role,
+      id,
+      dto,
+    );
+
+    void reply.send({ data: document });
   }
 }
